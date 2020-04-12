@@ -23,7 +23,7 @@ with open(sys.argv[-1]) as fp:
 # how many genepools we will spawn
 populations = 5
 # how many genes each genepool has
-geneSize = max(80, int(ceil(gridX * gridY / populations)))
+geneSize = max(80, int(ceil(max(gridX, gridY) * 10 / populations)))
 # if after this number of rounds we have not managed to get a better
 # fitness score than before, we terminate our program
 stopCriterion = 500
@@ -241,4 +241,6 @@ while True:
     print(rounds, peakFitness)
 
 print(genepool[0])
-print(solutionCheck(genepool[0][0]))
+
+with open("tests20.txt", "a") as fp:
+    fp.write("{},{}".format(rounds, peakFitness))

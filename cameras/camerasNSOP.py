@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import random
+from math import ceil
 from cameraInitialization import tryCameras
 from cameraInitialization import copyViewedByCamera
 from cameraInitialization import copyPositionCoveredBy
@@ -19,7 +20,7 @@ with open(sys.argv[-1]) as fp:
     line = fp.readline()
     minCoverage = int(line[0])
 
-geneSize = 200
+geneSize = int(ceil(max(gridX, gridY) * 10))
 stopCriterion = 1000
 genepool = []
 a = 1
