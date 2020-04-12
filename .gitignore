@@ -1,0 +1,4 @@
+cameras/__pycache__/
+cameras/grid*
+cameras/problemGeneratorBeta.py
+cameras/.ipynb_checkpoints/
