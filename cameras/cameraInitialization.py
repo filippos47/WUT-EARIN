@@ -106,7 +106,6 @@ def calculateMaxMinCoverage():
     for i in range(gridX):
         for j in range(gridY):
             n = len(positionCoveredBy[i][j])
-            print(n)
             if n > 0 and n < maxMinCoverage:
                 maxMinCoverage = n
     return maxMinCoverage
