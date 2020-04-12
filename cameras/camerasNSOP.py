@@ -11,14 +11,14 @@ with open(sys.argv[-1]) as fp:
     line = fp.readline()
     gridX, gridY = [int(el.strip()) for el in line.split(',')]
     line = fp.readline()
-    radius = int(line[0])
+    radius = int(line)
     grid = []
     for i in range(gridX):
         line = fp.readline()
         l = [int(el.strip()) for el in line.split(',')]
         grid.append(l)
     line = fp.readline()
-    minCoverage = int(line[0])
+    minCoverage = int(line)
 
 geneSize = int(ceil(max(gridX, gridY) * 10))
 stopCriterion = 1000

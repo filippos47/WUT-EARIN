@@ -10,7 +10,7 @@ def readGrid(filename):
         line = fp.readline()
         gridX, gridY = [int(el.strip()) for el in line.split(',')]
         line = fp.readline()
-        radius = int(line[0])
+        radius = int(line)
         for i in range(gridX):
             line = fp.readline()
             l = [int(el.strip()) for el in line.split(',')]
@@ -106,6 +106,7 @@ def calculateMaxMinCoverage():
     for i in range(gridX):
         for j in range(gridY):
             n = len(positionCoveredBy[i][j])
+            print(n)
             if n > 0 and n < maxMinCoverage:
                 maxMinCoverage = n
     return maxMinCoverage
