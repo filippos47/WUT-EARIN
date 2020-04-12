@@ -56,3 +56,6 @@ while True:
 
 with open(filename, "a") as fp:
     fp.write("{}\n".format(minCoverage))
+
+finalFilename = "grid{}X{}-R{}-MC{}.txt".format(N, M, radius, minCoverage)
+os.rename(filename, finalFilename)

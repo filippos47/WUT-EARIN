@@ -1,6 +1,7 @@
 import numpy as np
 import sys
 import random
+from math import ceil
 from cameraInitialization import tryCameras
 from cameraInitialization import copyViewedByCamera
 from cameraInitialization import copyPositionCoveredBy
@@ -19,22 +20,22 @@ with open(sys.argv[-1]) as fp:
     line = fp.readline()
     minCoverage = int(line[0])
 
-# how many genes each genepool has
-geneSize = 100
 # how many genepools we will spawn
-populations = 4
+populations = 5
+# how many genes each genepool has
+geneSize = max(80, int(ceil(gridX * gridY / populations)))
 # if after this number of rounds we have not managed to get a better
 # fitness score than before, we terminate our program
-stopCriterion = 1000
+stopCriterion = 500
 # fitness function's constants
 a = 1
 b = 0.000001
 # how many genes are we gonna sample
-sampleSize = 10
+sampleSize = 5
 # for each step we produce one child
-step = 50
+step = 40
 # every time this number of rounds passes we migrate between populations
-migrationTime = 5
+migrationTime = 10
 
 # This function evaluates how good a gene is based on two factors:
 # First and foremost, the number of cameras it uses.
@@ -180,10 +181,14 @@ while True:
         migrating = []
         for pop in range(populations):
             genepool = genepools[pop]
-            i = random.randrange(n)
-            j = random.randrange(n)
-            while i == j:
-                j = random.randrange(n)
+            sample = []
+            while len(sample) < sampleSize:
+                i = random.randrange(n)
+                if genepool[i] not in sample:
+                    sample.append((i, genepool[i][1]))
+            sample.sort(key = lambda gene: gene[1])
+            i = sample[0][0] # parent1 index
+            j = sample[1][0] # parent2 index
             if i > j:
                 i, j = j, i
             migrating.append(genepool[i])
