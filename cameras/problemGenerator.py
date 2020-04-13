@@ -37,7 +37,7 @@ while True:
             print(errorMsg)
         break
     elif readRadius == 'n':
-        radius = random.randrange(max(N, M) - 2)
+        radius = random.randrange(max(N, M) - 1)
         print(nRadiusMsg + '{}.'.format(radius))
         break
     print(errorMsg)
