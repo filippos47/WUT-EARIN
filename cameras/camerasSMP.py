@@ -1,10 +1,10 @@
-import numpy as np
 import sys
 import random
 from math import ceil
 from cameraInitialization import tryCameras
 from cameraInitialization import copyViewedByCamera
 from cameraInitialization import copyPositionCoveredBy
+import config
 
 
 with open(sys.argv[-1]) as fp:
@@ -20,22 +20,17 @@ with open(sys.argv[-1]) as fp:
     line = fp.readline()
     minCoverage = int(line)
 
-# how many genepools we will spawn
-populations = 5
+populations = config.populations
+patience = config.patience
+a = config.a
+b = config.b
+sampleSize = config.sampleSize
+step = config.step
+migrationTime = config.migrationTime
+mutationRatio = config.mutationRatio
 # how many genes each genepool has
 geneSize = max(80, int(ceil(max(gridX, gridY) * 10 / populations)))
-# if after this number of rounds we have not managed to get a better
-# fitness score than before, we terminate our program
-stopCriterion = 500
-# fitness function's constants
-a = 1
-b = 0.000001
-# how many genes are we gonna sample
-sampleSize = 5
-# for each step we produce one child
-step = 40
-# every time this number of rounds passes we migrate between populations
-migrationTime = 10
+
 
 # This function evaluates how good a gene is based on two factors:
 # First and foremost, the number of cameras it uses.
@@ -100,8 +95,8 @@ def crossover(parent1, parent2):
     child[start:stop] = largerParent[offset + start:offset + stop]
     return child
  
-# This function fixes the newly created child, mutating it at the same time.
-def fixAndMutate(child):
+# This function fixes the newly created child, inserting mutation at user chosen rate.
+def fixOrMutate(child):
     # First, we have to assess which positions are not covered enough.
     # At the same time, cameras that cover already covered enough positions
     # are kicked out.
@@ -125,17 +120,34 @@ def fixAndMutate(child):
         deletions += 1
 
     # Now, we are going to fix the remaining not covered enough positions.
-    # This is done by specifically adding cameras covering them.
+    # This is done by specifically adding cameras covering them, in 2 ways:
+    #   a) We select cameras that cover the maximum possible amount of positions,
+    # including the not covered enough one. This way we hope to eliminate as many
+    # undercovered positions as possible in one go, fixing the solution.
+    #   b) We select randomly cameras that cover the not covered enough position.
+    # This way, we are purely mutating our solution.
+    mutate = True if random.randrange(mutationRatio) < 1 else False
     while len(myMinimumGrid) > 0:
         position = list(myMinimumGrid.keys())[0]
         coverage = myMinimumGrid[position]
-        while coverage < minCoverage:
-            cam = random.choice(positionCoveredBy[position[0]][position[1]])
-            if cam not in child:
-                checkCamera(cam, myMinimumGrid)
-                child.append(cam)
-                break
-            coverage += 1
+        if mutate:
+            while True:
+                cam = random.choice(positionCoveredBy[position[0]][position[1]])
+                if cam not in child:
+                    checkCamera(cam, myMinimumGrid)
+                    child.append(cam)
+                    break
+        else:
+            sortedList = sorted(positionCoveredBy[position[0]][position[1]], \
+                key = lambda l: len(l))
+            index = 0
+            while True:
+                cam = sortedList[index]
+                if cam not in child:
+                    checkCamera(cam, myMinimumGrid)
+                    child.append(cam)
+                    break
+                index += 1
 
     fitness = fitnessFunction(child)
     return child, fitness
@@ -219,8 +231,8 @@ while True:
             p1 = sample[0][0] # parent1 index
             p2 = sample[1][0] # parent2 index
 
-            child1 = fixAndMutate(crossover(genepool[p1][0], genepool[p2][0]))
-            child2 = fixAndMutate(crossover(genepool[p1][0], genepool[p2][0]))
+            child1 = fixOrMutate(crossover(genepool[p1][0], genepool[p2][0]))
+            child2 = fixOrMutate(crossover(genepool[p1][0], genepool[p2][0]))
             # We keep the best child and the best parent
             if genepool[p1][1] < genepool[p2][1]:
                 genepool[p2] = child1 if child1[1] < child2[1] else child2
@@ -236,7 +248,7 @@ while True:
 
     if temp == peakFitness:
         fitnessUnchanged += 1
-        if fitnessUnchanged > stopCriterion:
+        if fitnessUnchanged > patience:
             break
     print(rounds, peakFitness)
 
