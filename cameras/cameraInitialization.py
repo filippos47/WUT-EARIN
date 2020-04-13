@@ -101,6 +101,8 @@ def tryCameras(filename):
             pos = (i, j)
             placeCamera(pos)
 
+# This function calculates the maximum minimum coverage which can be specified
+# for every position by the user.
 def calculateMaxMinCoverage():
     maxMinCoverage = gridX * gridY
     for i in range(gridX):

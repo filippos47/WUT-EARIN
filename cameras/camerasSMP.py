@@ -241,6 +241,3 @@ while True:
     print(rounds, peakFitness)
 
 print(genepool[0])
-
-with open("tests20.txt", "a") as fp:
-    fp.write("{},{}".format(rounds, peakFitness))
