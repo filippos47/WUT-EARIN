@@ -20,7 +20,7 @@ def readGrid(filename):
 
 
 
-# This function checks whether a candidate position is covered by a camera
+# This function checks whether a candidate position is covered by a camera.
 # pos: point we place the camera.
 # candidate: position we want to determine if it can be viewed by the camera
 def validityTest(pos, candidate):
@@ -51,9 +51,10 @@ def validityTest(pos, candidate):
     # pos and candidate are on different row and column
     else:
         # l1: line connecting pos and candidate
-        # we obtain the angle l1 has with the xx' axis
+        # we obtain the angle which l1 has with the xx' axis
         a1 = float(pos[1] - candidate[1]) / (pos[0] - candidate[0])
         angle1 = np.degrees(np.arctan([abs(a1)]))
+        # Here we specify the block of the points between pos and candidate
         xStart = min(pos[0], candidate[0])
         xEnd = max(pos[0], candidate[0])
         yStart = min(pos[1], candidate[1])
@@ -61,9 +62,10 @@ def validityTest(pos, candidate):
 
         for i in range(xStart, xEnd + 1):
             for j in range(yStart, yEnd + 1):
+                # We are interested only about walls in the specified block
                 if grid[i][j] == 0:
                     # l2: line connecting pos and testing point (i, j)
-                    # similarly, we obtain the angle l2 has with the xx' axis
+                    # similarly, we obtain the angle which l2 has with the xx' axis
                     if j == pos[1]:
                         angle2 = 0
                     elif i == pos[0]:
@@ -71,16 +73,17 @@ def validityTest(pos, candidate):
                     else:
                         a2 = float(j - pos[1]) / (i - pos[0])
                         angle2 = np.degrees(np.arctan([abs(a2)]))
-                    # if the angle between l1 and l2 is less than 30 degrees,
+                    # If the angle between l1 and l2 is less than 30 degrees,
                     # and the testing point is wall(0), we determine that this
-                    # wall obstructs the ability of the camera to view the candidate
+                    # wall obstructs the ability of the camera to view the candidate.
                     if abs(angle1 - angle2) < 30:
                         return 0
 
+    # No wall obstructs the camera's view of the candidate.
     return 1
 
 # This function places a camera at a certain point(pos) and determines which
-# positions are covered by it
+# positions are covered by it.
 def placeCamera(pos):
     for i in range(max(pos[0] - radius, 0), min(pos[0] + radius + 1, gridX)):
         for j in range(max(pos[1] - radius, 0), min(pos[1] + radius + 1, gridY)):
@@ -90,7 +93,7 @@ def placeCamera(pos):
                     viewedByCamera[pos[0]][pos[1]].append(candidate)
                     positionCoveredBy[i][j].append(pos)
 
-# This function proceeds to place a camera at every possible point
+# This function proceeds to place a camera at every possible point.
 def tryCameras(filename):
     readGrid(filename)
 

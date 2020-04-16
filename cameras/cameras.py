@@ -28,14 +28,14 @@ sampleSize = config.sampleSize
 step = config.step
 migrationTime = config.migrationTime
 mutationRatio = config.mutationRatio
-# how many genes each genepool has
+# how many genes each genepool/population has
 geneSize = max(80, int(ceil(max(gridX, gridY) * 10 / populations)))
 
 
 # This function evaluates how good a gene is based on two factors:
-# First and foremost, the number of cameras it uses.
+# First and foremost, the number of cameras it uses(length of the list).
 # Second and less important, the sum of how many times each position
-# is covered by a camera.
+# is covered by a camera(coverage score).
 # The second factor will act as a tie breaker between solutions 
 # with equal number of cameras.
 def fitnessFunction(gene):
@@ -83,6 +83,8 @@ def createGene():
     return camPositions, fitness
 
 # This function produces a new child, by making a crossover between 2 parents.
+# It initially sets the child equal to one parent, and then it proceeds to 
+# replace a part of the child with a part of the second parent.
 def crossover(parent1, parent2):
     largerParent = list(parent1) if len(parent1) > len(parent2) else list(parent2)
     smallerParent = list(parent2) if largerParent == list(parent1) else list(parent1)
@@ -100,6 +102,7 @@ def fixOrMutate(child):
     # First, we have to assess which positions are not covered enough.
     # At the same time, cameras that cover already covered enough positions
     # are kicked out.
+    random.shuffle(child)
     myMinimumGrid = minimumCoverageGrid.copy()
     index = 0
     toBeDeleted = []
@@ -161,7 +164,8 @@ def solutionCheck(gene):
     return message
 
 
-# Here, our main program begins
+# Here, our main program begins.
+# Setting up necessary structures..
 tryCameras(sys.argv[-1])
 viewedByCamera = copyViewedByCamera()
 positionCoveredBy = copyPositionCoveredBy()
@@ -174,7 +178,7 @@ genepools = []
 for i in range(populations):
     genepools.append([])
 
-# Generate initial populations
+# Generating initial population(s)..
 for i in range(populations):
     for j in range(geneSize):
         gene = createGene()
@@ -185,12 +189,13 @@ peakFitness = gridX * gridY
 fitnessUnchanged = 0
 rounds = 0
 n = geneSize 
+# Evolution starts..
 while True:
     rounds += 1
-
-    # Migrating between multiple populations
+    # Migrating between multiple populations in a circular manner..
     if rounds % migrationTime == 0 and populations > 1:
         migrating = []
+        # 2 genes are taken from each population.
         for pop in range(populations):
             genepool = genepools[pop]
             sample = []
@@ -216,24 +221,27 @@ while True:
             genepool.append(migrating[index + 1])
             index += 2
 
+    # Every population creates an amount of children depending its size.
     temp = peakFitness
     for pop in range(populations):
         genepool = genepools[pop]
         children = []
-        # for every 'step' genes, we create one child
+        # For every 'step' genes, we create two children.
         for i in range(0, geneSize, step):
+            # Sampling random genes..
             sample = []
             while len(sample) < sampleSize:
                 i = random.randrange(n)
                 if genepool[i] not in sample and i not in children:
                     sample.append((i, genepool[i][1]))
             sample.sort(key = lambda gene: gene[1])
+            # Selecting the 2 superior sampled genes as parents..
             p1 = sample[0][0] # parent1 index
             p2 = sample[1][0] # parent2 index
 
             child1 = fixOrMutate(crossover(genepool[p1][0], genepool[p2][0]))
             child2 = fixOrMutate(crossover(genepool[p1][0], genepool[p2][0]))
-            # We keep the best child and the best parent
+            # We keep the best child and the best parent.
             if genepool[p1][1] < genepool[p2][1]:
                 genepool[p2] = child1 if child1[1] < child2[1] else child2
                 children.append(j)
@@ -246,6 +254,7 @@ while True:
             peakFitness = int(genepool[0][1])
             fitnessUnchanged = 0
 
+    # Checking if peak fitness score improved..
     if temp == peakFitness:
         fitnessUnchanged += 1
         if fitnessUnchanged > patience:
