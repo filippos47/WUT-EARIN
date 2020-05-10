@@ -1,5 +1,9 @@
 cameras/__pycache__/
 cameras/grid*
-cameras/problemGeneratorBeta.py
 cameras/.ipynb_checkpoints/
-cameras/tests*
+cameras/test*
+cameras/*.txt
+cameras/*.png
+cameras/table*
+cameras/resultsParser.py
+kaggle-dont-get-kicked/table*
